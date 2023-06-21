@@ -1,0 +1,12 @@
+pipeline{
+    agent any
+    stages{
+        stage('print values selected by the user to do deployment'){
+            steps{
+                echo "selectEnvToDeploy: ${params.selectEnvToDeploy}"
+                echo "eks_cluster_name: ${params.eks_cluster_name}"
+                echo "aws_region: ${params.aws_region}"
+            }
+        }
+    }
+}
