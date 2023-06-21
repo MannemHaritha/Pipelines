@@ -1,0 +1,23 @@
+pipeline{
+    agent any
+    tools{
+        maven 'maven-3.9.2'
+    }
+    stages { 
+        stage('git clone'){
+            steps{
+                git branch: 'develop', url: 'https://github.com/MannemHaritha/springboot-maven-course-micro-svc.git'
+            }
+        }
+        stage('Build') { 
+            steps { 
+               sh 'mvn clean package' 
+            }
+        }
+        stage('sonar scanner for maven project') { 
+            steps { 
+               sh 'mvn sonar:sonar -Dsonar.token=squ_0bf3ee7ce496bf11c947de5b7a41475a8eed55a4 -Dsoner.host.url=http://44.211.30.176:9000   -Dsonar.projectkey=springboot-maven-course-micro-svc -Dsonar.projectname=springboot-maven-course-micro-svc' 
+            }
+        }
+    }
+}
