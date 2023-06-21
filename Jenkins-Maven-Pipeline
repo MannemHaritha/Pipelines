@@ -1,0 +1,19 @@
+pipeline{
+    agent any
+    tools {
+  maven 'Maven-3.8.6'
+     }
+    stages{
+        stage('get the code from github'){
+            steps{
+                git branch: 'master', credentialsId: 'mannemharitha-git hub-credentials', url: 'https://github.com/MannemHaritha/springboot-maven-course-micro-svc.git'
+            }
+        }
+        stage('build the project using maven '){
+            steps{
+               sh 'mvn clean install'
+            }
+           
+        }
+        }
+    }
