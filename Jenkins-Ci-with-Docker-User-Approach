@@ -1,0 +1,45 @@
+pipeline{
+    environment {
+    registry = '255766941731.dkr.ecr.us-east-1.amazonaws.com/cicd'
+    registryCredential = 'my-aws-jenkins-creds'
+    dockerImage = ''
+  }
+    agent any
+    tools{
+        maven 'maven-3.8.7'
+    }
+    stages{
+        stage('git check out'){
+            steps{
+                git branch: 'master', url: 'https://github.com/MannemHaritha/springboot-maven-course-micro-svc.git'
+            }
+        }
+        stage('build maven project'){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage('sonar scanner for maven project') { 
+            steps { 
+               sh 'mvn sonar:sonar -Dsonar.token=sqa_81701bfcf6e191c265f4b513edb629dde074c479 -Dsoner.host.url=http://3.86.24.176:9000   -Dsonar.projectkey=springboot-maven-course-micro-svc -Dsonar.projectname=springboot-maven-course-micro-svc' 
+            }
+        }
+        stage('Building image') {
+           steps{
+               script {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                }
+            }    
+	    }
+        stage('Deploy image') {
+            steps{
+                script{
+                    docker.withRegistry("https://" + registry, "ecr:us-east-1:" + registryCredential) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+    }
+}
+
