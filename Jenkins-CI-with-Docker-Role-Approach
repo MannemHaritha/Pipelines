@@ -1,0 +1,35 @@
+pipeline{
+    agent any
+    tools{
+        maven 'maven-3.8.7'
+    }
+    stages{
+        stage('git check out'){
+            steps{
+                git branch: 'master', url: 'https://github.com/MannemHaritha/springboot-maven-course-micro-svc.git'
+            }
+        }
+        stage('build maven project'){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage('sonar scanner for maven project') { 
+            steps { 
+               sh 'mvn sonar:sonar -Dsonar.token=sqa_03ba14a02318dc21b4ae84be485de730f9620e32 -Dsoner.host.url=http://184.73.131.213:9000   -Dsonar.projectkey=springboot-maven-course-micro-svc -Dsonar.projectname=springboot-maven-course-micro-svc' 
+            }
+        }
+        stage('login to AMAZON ECR') { 
+            steps { 
+               sh 'aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 255766941731.dkr.ecr.us-east-1.amazonaws.com'
+            }
+        }
+        stage('build docker image/tag/push to ECR repository') { 
+            steps { 
+               	sh 'docker build -t harithacicd:$BUILD_NUMBER .'
+				sh 'docker tag harithacicd:$BUILD_NUMBER 255766941731.dkr.ecr.us-east-1.amazonaws.com/cicd:$BUILD_NUMBER'
+				sh 'docker push 255766941731.dkr.ecr.us-east-1.amazonaws.com/cicd:$BUILD_NUMBER'
+			}
+        }
+    }
+}
